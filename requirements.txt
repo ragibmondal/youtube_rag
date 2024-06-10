@@ -1,0 +1,8 @@
+streamlit
+python-dotenv
+google-generativeai
+youtube-transcript-api
+requests
+Pillow
+pandas
+matplotlib
