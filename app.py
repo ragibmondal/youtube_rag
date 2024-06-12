@@ -1,4 +1,5 @@
 import streamlit as st
+import streamlit.components.v1 as components
 from dotenv import load_dotenv
 load_dotenv()
 import os
@@ -14,41 +15,117 @@ import matplotlib.pyplot as plt
 from collections import Counter
 import re
 
+# Configure Google Generative AI
+genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+
 # Set page configuration
 st.set_page_config(
     page_title="Advanced Global Content Studio",
     page_icon="🌐",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="auto"
 )
 
 # Define custom CSS
 custom_css = """
 <style>
+    /* General styles */
+    body {
+        font-family: 'Helvetica Neue', sans-serif;
+        background-color: #f8f8f8;
+        color: #333;
+    }
+
+    /* Heading styles */
+    h1, h2, h3, h4, h5, h6 {
+        font-weight: bold;
+        color: #2B8BED;
+    }
+
+    /* Button styles */
     .stButton > button {
-        width: 100%;
+        background-color: #2B8BED;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 20px;
+        font-size: 16px;
+        font-weight: bold;
+        transition: all 0.3s ease;
     }
     .stButton > button:hover {
-        background-color: #2B8BED;
+        background-color: #1E6CC8;
     }
+
+    /* Input field styles */
     .stTextInput > div > div > input {
         font-size: 16px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
     }
+
+    /* Dropdown styles */
     .stSelectbox > div > div > div {
         font-size: 16px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
     }
+
+    /* Radio button styles */
     .stRadio > label > div {
         font-size: 16px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background-color: #fff;
+        transition: all 0.3s ease;
     }
+    .stRadio > label > div:hover {
+        background-color: #f0f0f0;
+    }
+
+    /* Slider styles */
     .stSlider > div > div > div {
         font-size: 16px;
+    }
+
+    /* Expander styles */
+    .stExpander > div > div > div > div {
+        background-color: #fff;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 20px;
+    }
+
+    /* Sidebar styles */
+    .sidebar .sidebar-content {
+        background-color: #2B8BED;
+        color: #fff;
+        padding: 20px;
+    }
+    .sidebar h3 {
+        color: #fff;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .sidebar p {
+        color: #fff;
+        margin-bottom: 20px;
+    }
+
+    /* HoverInfo styles */
+    .hover-info {
+        background-color: #333;
+        color: #fff;
+        padding: 10px;
+        border-radius: 4px;
+        font-size: 14px;
     }
 </style>
 """
 st.markdown(custom_css, unsafe_allow_html=True)
-
-# Configure Google Generative AI
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 # Helper functions
 def extract_video_id(youtube_url):
@@ -101,37 +178,16 @@ def get_table_download_link(df):
 
 def main():
     # Sidebar
-    st.sidebar.title("About")
-    st.sidebar.info(
-        "This advanced global studio uses AI to transform YouTube videos into rich, multilingual content with analytics. "
-        "Perfect for international content creators, global marketers, researchers, and anyone looking to deeply understand and reach a diverse audience! 🌐🎓🚀\n\n"
-        "Made with ❤️ by Ragib"
-    )
-
-    st.sidebar.title("New Features")
-    st.sidebar.markdown(
-        "- 🚀 Fast `gemini-1.5-flash-latest` model\n"
-        "- 📊 Transcript analysis with word frequency\n"
-        "- 📝 SRT subtitle file download\n"
-        "- 🎓 Academic summary generation\n"
-        "- 🛍️ Product descriptions from videos\n"
-        "- 🌐 Support for Greek, Hebrew, Indonesian & more\n"
-        "- 📈 Longer content up to 5000 characters\n"
-        "- 🎨 'Persuasive' tone for marketing content"
-    )
-
-    st.sidebar.title("Instructions")
-    st.sidebar.markdown(
-        "1. Paste a YouTube video link\n"
-        "2. Customize content type, tone, languages\n"
-        "3. Choose model, image, and analysis options\n"
-        "4. Click 'Generate Content'\n"
-        "5. Explore analytics and download assets!"
-    )
+    with st.sidebar:
+        st.markdown('<div class="sidebar-content">', unsafe_allow_html=True)
+        st.title("Advanced Global Content Studio")
+        st.write("This advanced global studio uses AI to transform YouTube videos into rich, multilingual content with analytics. Perfect for international content creators, global marketers, researchers, and anyone looking to deeply understand and reach a diverse audience! 🌐🎓🚀")
+        st.write("Made with ❤️ by Ragib")
+        st.markdown('</div>', unsafe_allow_html=True)
 
     # Main content
-    st.title("🌐 Advanced Global Content Studio")
-    st.markdown("Transform YouTube videos into rich, multilingual content with advanced analytics! 🚀🌍")
+    st.title("🌐 Transform YouTube Videos into Global Content")
+    st.write("Create rich, multilingual content from YouTube videos with advanced analytics and AI.")
 
     # YouTube video link input
     youtube_link = st.text_input("Enter YouTube Video Link:", placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ", key="video_link")
@@ -151,9 +207,9 @@ def main():
                 # Content generation options
                 col1, col2, col3 = st.columns(3)
                 with col1:
-                    content_type = st.selectbox("Select Content Type:", ["News Article", "Blog Post", "Social Media Post", "Email Newsletter", "Product Description", "Academic Summary"])
+                    content_type = st.selectbox("Select Content Type:", ["News Article", "Blog Post", "Social Media Post", "Email Newsletter", "Product Description", "Academic Summary"], help="Choose the type of content you want to generate from the video transcript.")
                 with col2:
-                    tone = st.selectbox("Select Tone:", ["Informative", "Casual", "Professional", "Humorous", "Inspirational", "Empathetic", "Persuasive"])
+                    tone = st.selectbox("Select Tone:", ["Informative", "Casual", "Professional", "Humorous", "Inspirational", "Empathetic", "Persuasive"], help="Choose the tone or style for the generated content.")
                 with col3:
                     languages = {
                         "English": "en", "Spanish": "es", "French": "fr", "German": "de", "Italian": "it",
@@ -163,17 +219,17 @@ def main():
                         "Dutch": "nl", "Polish": "pl", "Swedish": "sv", "Thai": "th", "Vietnamese": "vi",
                         "Greek": "el", "Hebrew": "he", "Indonesian": "id", "Malay": "ms", "Filipino": "fil"
                     }
-                    input_language = st.selectbox("Select Transcript Language:", list(languages.keys()))
+                    input_language = st.selectbox("Select Transcript Language:", list(languages.keys()), help="Choose the language of the video transcript.")
 
-                length = st.slider("Content Length:", min_value=100, max_value=5000, value=500, step=100)
+                length = st.slider("Content Length:", min_value=100, max_value=5000, value=500, step=100, help="Adjust the length of the generated content.")
 
                 col4, col5 = st.columns(2)
                 with col4:
-                    model_option = st.radio("Choose Model:", ["gemini-1.5-pro-latest", "gemini-1.5-flash-latest", "gemini-1.0-pro"])
+                    model_option = st.radio("Choose Model:", ["gemini-1.5-pro-latest", "gemini-1.5-flash-latest", "gemini-1.0-pro"], help="Select the AI model to be used for content generation.")
                 with col5:
-                    analyze_transcript = st.checkbox("Analyze Transcript")
+                    analyze_transcript = st.checkbox("Analyze Transcript", help="Enable or disable transcript analysis with key themes, sentiment, and word frequency.")
 
-                output_language = st.selectbox("Select Output Language:", list(languages.keys()))
+                output_language = st.selectbox("Select Output Language:", list(languages.keys()), help="Choose the language for the generated content.")
 
                 # Generate content button
                 generate_button = st.button("Generate Content 🖋️")
@@ -258,7 +314,17 @@ def main():
     else:
         st.info("Paste a YouTube video link to get started.")
 
-   
+    # User feedback form
+    st.subheader("Share Your Feedback 💬")
+    with st.form("feedback_form"):
+        name = st.text_input("Name:")
+        email = st.text_input("Email:")
+        feedback = st.text_area("Your feedback or suggestions:")
+
+        submit_button = st.form_submit_button("Submit")
+        if submit_button:
+            # Code to handle feedback submission goes here
+            st.success("Thank you for your feedback!")
 
 if __name__ == "__main__":
     main()
