@@ -258,17 +258,7 @@ def main():
     else:
         st.info("Paste a YouTube video link to get started.")
 
-    # User feedback form
-    st.subheader("Share Your Feedback 💬")
-    with st.form("feedback_form"):
-        name = st.text_input("Name:")
-        email = st.text_input("Email:")
-        feedback = st.text_area("Your feedback or suggestions:")
-
-        submit_button = st.form_submit_button("Submit")
-        if submit_button:
-            # Code to handle feedback submission goes here
-            st.success("Thank you for your feedback!")
+   
 
 if __name__ == "__main__":
     main()
