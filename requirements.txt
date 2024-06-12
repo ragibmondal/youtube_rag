@@ -6,3 +6,6 @@ requests
 Pillow
 pandas
 matplotlib
+pdfkit
+python-docx
+openpyxl
