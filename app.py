@@ -181,7 +181,7 @@ def get_table_download_link(df):
     href = f'<a href="data:file/csv;base64,{b64}" download="transcript_analysis.csv">Download Transcript Analysis (CSV)</a>'
     return href
     def generate_pdf(content, filename):
-    pdfkit.from_string(content, filename)
+    pdfkit.from_string(content, filename):
 
 def generate_word(content, filename):
     doc = docx.Document()
