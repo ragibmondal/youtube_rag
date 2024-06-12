@@ -180,8 +180,9 @@ def get_table_download_link(df):
     b64 = base64.b64encode(csv.encode()).decode()
     href = f'<a href="data:file/csv;base64,{b64}" download="transcript_analysis.csv">Download Transcript Analysis (CSV)</a>'
     return href
-    def generate_pdf(content, filename):
-    pdfkit.from_string(content, filename):
+
+def generate_pdf(content, filename):
+    pdfkit.from_string(content, filename)
 
 def generate_word(content, filename):
     doc = docx.Document()
@@ -310,52 +311,49 @@ def main():
                             file_formats = ["Text", "PDF", "Word", "Excel"]
                             export_format = st.selectbox("Export Format:", file_formats, index=0)
 
+                            filename = f"{content_type.replace(' ', '_').lower()}_{output_language}.{export_format.lower()}"
+
                             if export_format == "Text":
                                 st.download_button(
                                     label=f"Download {content_type} 📥",
                                     data=content,
-                                    file_name=f"{content_type.replace(' ', '_').lower()}_{output_language}.txt",
+                                    file_name=filename,
                                     mime="text/plain",
                                     key="download_content_text"
                                 )
                             elif export_format == "PDF":
-                                elif export_format == "PDF":
-                                 elif export_format == "PDF":
-                                    generate_pdf(content, filename)
-                                    with open(filename, "rb") as f:
+                                generate_pdf(content, filename)
+                                with open(filename, "rb") as f:
                                     bytes = f.read()
                                     st.download_button(
-                                    label=f"Download {content_type} 📥",
-                                    data=bytes,
-                                    file_name=filename,
-                                    mime="application/pdf",
-                                    key="download_content_pdf")
-                                pass
-                            elif export_format == "Word":
-                                     generate_word(content, filename)
-                                    with open(filename, "rb") as f:
-                                    bytes = f.read()
-                                    st.download_button(
-                                    label=f"Download {content_type} 📥",
-                                    data=bytes,
-                                    file_name=filename,
-                                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-                                    key="download_content_word"
+                                        label=f"Download {content_type} 📥",
+                                        data=bytes,
+                                        file_name=filename,
+                                        mime="application/pdf",
+                                        key="download_content_pdf"
                                     )
-                                pass
+                            elif export_format == "Word":
+                                generate_word(content, filename)
+                                with open(filename, "rb") as f:
+                                    bytes = f.read()
+                                    st.download_button(
+                                        label=f"Download {content_type} 📥",
+                                        data=bytes,
+                                        file_name=filename,
+                                        mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                        key="download_content_word"
+                                    )
                             elif export_format == "Excel":
                                 generate_excel(content, filename)
-    with open(filename, "rb") as f:
-        bytes = f.read()
-    st.download_button(
-        label=f"Download {content_type} 📥",
-        data=bytes,
-        file_name=filename,
-        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        key="download_content_excel"
-    )
-                                pass
-
+                                with open(filename, "rb") as f:
+                                    bytes = f.read()
+                                    st.download_button(
+                                        label=f"Download {content_type} 📥",
+                                        data=bytes,
+                                        file_name=filename,
+                                        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                        key="download_content_excel"
+                                    )
                     else:
                         st.warning(f"Please make sure the video has captions available in {input_language}.")
             else:
@@ -364,7 +362,6 @@ def main():
             st.error("Invalid YouTube URL. Please enter a valid video link.")
     else:
         st.info("Paste a YouTube video link to get started.")
-
 
 if __name__ == "__main__":
     main()
