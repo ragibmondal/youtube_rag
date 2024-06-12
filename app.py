@@ -14,6 +14,11 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from collections import Counter
 import re
+import pdfkit
+import docx
+from docx.shared import Inches
+import openpyxl
+from openpyxl.styles import Font, Alignment
 
 # Configure Google Generative AI
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
@@ -175,6 +180,24 @@ def get_table_download_link(df):
     b64 = base64.b64encode(csv.encode()).decode()
     href = f'<a href="data:file/csv;base64,{b64}" download="transcript_analysis.csv">Download Transcript Analysis (CSV)</a>'
     return href
+    def generate_pdf(content, filename):
+    pdfkit.from_string(content, filename)
+
+def generate_word(content, filename):
+    doc = docx.Document()
+    doc.add_heading(filename.split(".")[0], 0)
+    doc.add_paragraph(content)
+    doc.save(filename)
+
+def generate_excel(content, filename):
+    workbook = openpyxl.Workbook()
+    sheet = workbook.active
+    sheet.title = filename.split(".")[0]
+    sheet.column_dimensions['A'].width = 100
+    sheet['A1'] = content
+    sheet['A1'].font = Font(name='Arial', size=12)
+    sheet['A1'].alignment = Alignment(wrap_text=True, vertical='top')
+    workbook.save(filename)
 
 def main():
     # Sidebar
@@ -296,13 +319,41 @@ def main():
                                     key="download_content_text"
                                 )
                             elif export_format == "PDF":
-                                # Code to generate PDF file goes here
+                                elif export_format == "PDF":
+                                 elif export_format == "PDF":
+                                    generate_pdf(content, filename)
+                                    with open(filename, "rb") as f:
+                                    bytes = f.read()
+                                    st.download_button(
+                                    label=f"Download {content_type} 📥",
+                                    data=bytes,
+                                    file_name=filename,
+                                    mime="application/pdf",
+                                    key="download_content_pdf")
                                 pass
                             elif export_format == "Word":
-                                # Code to generate Word file goes here
+                                     generate_word(content, filename)
+                                    with open(filename, "rb") as f:
+                                    bytes = f.read()
+                                    st.download_button(
+                                    label=f"Download {content_type} 📥",
+                                    data=bytes,
+                                    file_name=filename,
+                                    mime="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                                    key="download_content_word"
+                                    )
                                 pass
                             elif export_format == "Excel":
-                                # Code to generate Excel file goes here
+                                generate_excel(content, filename)
+    with open(filename, "rb") as f:
+        bytes = f.read()
+    st.download_button(
+        label=f"Download {content_type} 📥",
+        data=bytes,
+        file_name=filename,
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        key="download_content_excel"
+    )
                                 pass
 
                     else:
