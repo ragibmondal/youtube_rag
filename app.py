@@ -169,9 +169,22 @@ def main():
 
     st.sidebar.title("About")
     st.sidebar.info(
-"This advanced global studio uses AI to transform YouTube videos into rich, multilingual content with analytics. Perfect for international content creators, global marketers, researchers, and anyone looking to deeply understand and reach a diverse audience! 🌐🎓🚀
-Made with ❤️ by Ragib"
-)
+        "This advanced global studio uses AI to transform YouTube videos into rich, multilingual content with analytics. "
+        "Perfect for international content creators, global marketers, researchers, and anyone looking to deeply understand and reach a diverse audience! 🌐🎓🚀\n\n"
+        "Made with ❤️ by Ragib"
+    )
+
+    st.sidebar.title("New Features")
+    st.sidebar.markdown(
+        "- 🚀 Fast `gemini-1.5-flash-latest` model\n"
+        "- 📊 Transcript analysis with word frequency\n"
+        "- 📝 SRT subtitle file download\n"
+        "- 🎓 Academic summary generation\n"
+        "- 🛍️ Product descriptions from videos\n"
+        "- 🌐 Support for Greek, Hebrew, Indonesian & more\n"
+        "- 📈 Longer content up to 5000 characters\n"
+        "- 🎨 'Persuasive' tone for marketing content"
+    )
 
 
 if __name__ == "__main__":
