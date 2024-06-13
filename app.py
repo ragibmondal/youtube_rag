@@ -150,11 +150,15 @@ def extract_transcript(video_id, language='en'):
         return None
 
 def generate_content(transcript, prompt, tone, length, model_name="gemini-1.5-pro-latest"):
-    model = genai.GenerativeModel(model_name)
     transcript_text = " ".join([i["text"] for i in transcript])
     full_prompt = f"{prompt}\n\nTranscript:\n{transcript_text}\n\nTone: {tone}\nLength: {length}"
-    response = model.generate_content(full_prompt)
-    return response.text
+    response = genai.generate_text(
+        model=model_name,
+        text=full_prompt,
+        temperature=0.7,
+        max_length=length
+    )
+    return response[0]['text']
 
 def get_video_metadata(video_id):
     url = f"https://www.googleapis.com/youtube/v3/videos?part=snippet&id={video_id}&key={os.getenv('YOUTUBE_API_KEY')}"
@@ -172,8 +176,17 @@ def generate_srt(transcript):
         duration = segment['duration']
         end = start + duration
         text = segment['text']
-        srt += f"{i}\n{start:.3f} --> {end:.3f}\n{text}\n\n"
+        srt += f"{i}\n{format_time(start)} --> {format_time(end)}\n{text}\n\n"
     return srt
+
+def format_time(seconds):
+    ms = int((seconds % 1) * 1000)
+    seconds = int(seconds)
+    minutes = seconds // 60
+    seconds = seconds % 60
+    hours = minutes // 60
+    minutes = minutes % 60
+    return f"{hours:02}:{minutes:02}:{seconds:02},{ms:03}"
 
 def get_table_download_link(df):
     csv = df.to_csv(index=False)
