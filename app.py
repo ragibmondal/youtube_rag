@@ -169,11 +169,9 @@ def main():
 
     st.sidebar.title("About")
     st.sidebar.info(
-       "This advanced global studio uses AI to transform YouTube videos into rich, multilingual content with analytics. Perfect for international content creators, global marketers, researchers, and anyone looking to deeply understand and reach a diverse audience! 🌐🎓🚀
-
+"This advanced global studio uses AI to transform YouTube videos into rich, multilingual content with analytics. Perfect for international content creators, global marketers, researchers, and anyone looking to deeply understand and reach a diverse audience! 🌐🎓🚀
 Made with ❤️ by Ragib"
-       
-    )
+)
 
 
 if __name__ == "__main__":
