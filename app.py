@@ -189,7 +189,7 @@ def main():
         "- 📝 SRT subtitle file download\n"
         "- 🎓 Academic summary generation\n"
         "- 🛍️ Product descriptions from videos\n"
-        "- 🌐 Support for Bangla, Hebrew, Indonesian & more\n"
+        "- 🌐 Support for Greek, Hebrew, Indonesian & more\n"
         "- 📈 Longer content up to 5000 characters\n"
         "- 🎨 'Persuasive' tone for marketing content"
     )
