@@ -5,6 +5,8 @@ import os
 import google.generativeai as genai
 from youtube_transcript_api import YouTubeTranscriptApi
 import requests
+from io import BytesIO
+from PIL import Image
 import json
 import base64
 import pandas as pd
@@ -67,114 +69,132 @@ def generate_wordcloud(word_freq):
     return wordcloud
 
 def main():
-    st.set_page_config(page_title="Advanced Global Content Studio", page_icon="🌐", layout="wide")
+    st.set_page_config(page_title="Global Content Studio", page_icon="🌐", layout="wide")
 
-    st.title("🌐 YouTube to Global Multimedia Studio")
+    st.title("Global Content Studio")
     st.markdown("Transform YouTube videos into rich, multilingual content with advanced analytics! 🚀🌍")
 
     youtube_link = st.text_input("Enter YouTube Video Link:", placeholder="https://www.youtube.com/watch?v=dQw4w9WgXcQ")
-    
-    if st.button("Enter"):
-        if youtube_link:
-            video_id = extract_video_id(youtube_link)
-            if video_id:
-                metadata = get_video_metadata(video_id)
-                if metadata:
-                    st.sidebar.header("Video Details")
-                    st.sidebar.image(metadata["thumbnails"]["high"]["url"], use_column_width=True)
-                    st.sidebar.write(f"**Title:** {metadata['title']}")
-                    st.sidebar.write(f"**Channel:** {metadata['channelTitle']}")
-                    st.sidebar.write(f"**Published:** {metadata['publishedAt'][:10]}")
-                    st.sidebar.write(f"**Description:** {metadata['description']}")
 
-                col1, col2, col3 = st.columns(3)
-                with col1:
-                    content_type = st.selectbox("Select Content Type:", ["News Article", "Blog Post", "Social Media Post", "Email Newsletter", "Product Description", "Academic Summary"])
-                with col2:
-                    tone = st.selectbox("Select Tone:", ["Informative", "Casual", "Professional", "Humorous", "Inspirational", "Empathetic", "Persuasive"])
-                with col3:
-                    languages = {
-                        "English": "en", "Spanish": "es", "French": "fr", "German": "de", "Italian": "it",
-                        "Japanese": "ja", "Korean": "ko", "Portuguese": "pt", "Russian": "ru",
-                        "Chinese (Simplified)": "zh-Hans", "Chinese (Traditional)": "zh-Hant",
-                        "Arabic": "ar", "Hindi": "hi", "Bengali": "bn", "Urdu": "ur", "Turkish": "tr",
-                        "Dutch": "nl", "Polish": "pl", "Swedish": "sv", "Thai": "th", "Vietnamese": "vi",
-                        "Greek": "el", "Hebrew": "he", "Indonesian": "id", "Malay": "ms", "Filipino": "fil"
-                    }
-                    input_language = st.selectbox("Select Transcript Language:", list(languages.keys()), help="Choose the language for the transcript.")
+    if youtube_link:
+        video_id = extract_video_id(youtube_link)
+        if video_id:
+            metadata = get_video_metadata(video_id)
+            if metadata:
+                st.sidebar.header("Video Details")
+                st.sidebar.image(metadata["thumbnails"]["high"]["url"], use_column_width=True)
+                st.sidebar.write(f"**Title:** {metadata['title']}")
+                st.sidebar.write(f"**Channel:** {metadata['channelTitle']}")
+                st.sidebar.write(f"**Published:** {metadata['publishedAt'][:10]}")
+                st.sidebar.write(f"**Description:** {metadata['description']}")
 
-                length = st.slider("Content Length:", min_value=100, max_value=5000, value=500, step=100, help="Adjust the length of the generated content.")
+            col1, col2, col3 = st.columns(3)
+            with col1:
+                content_type = st.selectbox("Select Content Type:", ["News Article", "Blog Post", "Social Media Post", "Email Newsletter", "Product Description", "Academic Summary"])
+            with col2:
+                tone = st.selectbox("Select Tone:", ["Informative", "Casual", "Professional", "Humorous", "Inspirational", "Empathetic", "Persuasive"])
+            with col3:
+                languages = {
+                    "English": "en", "Spanish": "es", "French": "fr", "German": "de", "Italian": "it",
+                    "Japanese": "ja", "Korean": "ko", "Portuguese": "pt", "Russian": "ru",
+                    "Chinese (Simplified)": "zh-Hans", "Chinese (Traditional)": "zh-Hant",
+                    "Arabic": "ar", "Hindi": "hi", "Bengali": "bn", "Urdu": "ur", "Turkish": "tr",
+                    "Dutch": "nl", "Polish": "pl", "Swedish": "sv", "Thai": "th", "Vietnamese": "vi",
+                    "Greek": "el", "Hebrew": "he", "Indonesian": "id", "Malay": "ms", "Filipino": "fil"
+                }
+                input_language = st.selectbox("Select Transcript Language:", list(languages.keys()), help="Choose the language for the transcript.")
 
-                col4, col5 = st.columns(2)
-                with col4:
-                    model_option = st.radio("Choose Model:", ["gemini-1.5-pro-latest", "gemini-1.5-flash-latest", "gemini-1.0-pro"], help="Select the AI model for content generation.")
-                with col5:
-                    analyze_transcript = st.checkbox("Analyze Transcript", help="Check this to perform a detailed analysis of the transcript.")
+            length = st.slider("Content Length:", min_value=100, max_value=5000, value=500, step=100, help="Adjust the length of the generated content.")
 
-                output_languages = st.multiselect("Select Output Languages:", list(languages.keys()), help="Choose the languages for the generated content.")
+            col4, col5 = st.columns(2)
+            with col4:
+                model_option = st.radio("Choose Model:", ["gemini-1.5-pro-latest", "gemini-1.5-flash-latest", "gemini-1.0-pro"], help="Select the AI model for content generation.")
+            with col5:
+                analyze_transcript = st.checkbox("Analyze Transcript", help="Check this to perform a detailed analysis of the transcript.")
 
-                if st.button("Generate Content 🖋️"):
-                    with st.spinner(f"Fetching video transcript in {input_language}..."):
-                        transcript = extract_transcript(video_id, languages[input_language])
+            output_languages = st.multiselect("Select Output Languages:", list(languages.keys()), help="Choose the languages for the generated content.")
 
-                    if transcript:
-                        srt_data = generate_srt(transcript)
-                        st.download_button(
-                            label="Download SRT 📝",
-                            data=srt_data,
-                            file_name=f"transcript_{languages[input_language]}.srt",
-                            mime="text/plain"
-                        )
+            if st.button("Generate Content 🖋️"):
+                with st.spinner(f"Fetching video transcript in {input_language}..."):
+                    transcript = extract_transcript(video_id, languages[input_language])
 
-                        if analyze_transcript:
-                            with st.expander("Transcript Analysis 📊"):
-                                analysis_prompt = f"Analyze the following transcript for key themes, sentiment, and important timestamps. Transcript: {json.dumps(transcript)}"
-                                analysis = generate_content(transcript, analysis_prompt, "Informative", 1000, model_option)
-                                st.write(analysis)
+                if transcript:
+                    srt_data = generate_srt(transcript)
+                    st.download_button(
+                        label="Download SRT 📝",
+                        data=srt_data,
+                        file_name=f"transcript_{languages[input_language]}.srt",
+                        mime="text/plain"
+                    )
 
-                                words = " ".join([seg["text"] for seg in transcript]).lower().split()
-                                word_freq = Counter(words)
-                                df = pd.DataFrame.from_dict(word_freq, orient='index', columns=['Frequency']).sort_values(by='Frequency', ascending=False)
-                                
-                                plt.figure(figsize=(10, 6))
-                                df.head(20).plot(kind='bar')
-                                plt.title("Top 20 Word Frequencies")
-                                plt.xlabel("Words")
-                                plt.ylabel("Frequency")
-                                st.pyplot(plt)
+                    if analyze_transcript:
+                        with st.expander("Transcript Analysis 📊"):
+                            analysis_prompt = f"Analyze the following transcript for key themes, sentiment, and important timestamps. Transcript: {json.dumps(transcript)}"
+                            analysis = generate_content(transcript, analysis_prompt, "Informative", 1000, model_option)
+                            st.write(analysis)
 
-                                st.markdown(get_table_download_link(df), unsafe_allow_html=True)
+                            words = " ".join([seg["text"] for seg in transcript]).lower().split()
+                            word_freq = Counter(words)
+                            df = pd.DataFrame.from_dict(word_freq, orient='index', columns=['Frequency']).sort_values(by='Frequency', ascending=False)
+                            
+                            plt.figure(figsize=(10, 6))
+                            df.head(20).plot(kind='bar')
+                            plt.title("Top 20 Word Frequencies")
+                            plt.xlabel("Words")
+                            plt.ylabel("Frequency")
+                            st.pyplot(plt)
 
-                                wordcloud = generate_wordcloud(word_freq)
-                                st.image(wordcloud.to_array(), use_column_width=True)
+                            st.markdown(get_table_download_link(df), unsafe_allow_html=True)
 
-                        for output_language in output_languages:
-                            with st.spinner(f"Generating {content_type.lower()} in {output_language}..."):
-                                prompts = {
-                                    "News Article": f"You are a news writer. Generate a concise, factual news article in a journalistic style based on the given YouTube video transcript. Write the article in {output_language}.",
-                                    "Blog Post": f"You are a blog writer. Create a detailed, engaging blog post covering the key points and insights from the given YouTube video transcript. Write the blog post in {output_language}.",
-                                    "Social Media Post": f"You are a social media manager. Create a short, engaging post suitable for platforms like Twitter or LinkedIn, highlighting the main takeaway from the YouTube video. Write the post in {output_language}.",
-                                    "Email Newsletter": f"You are a content marketer. Create an informative and engaging email newsletter summarizing the key points from the YouTube video. Write the newsletter in {output_language}.",
-                                    "Product Description": f"You are a copywriter. Based on the YouTube video, create a compelling product description that highlights features and benefits. Write in {output_language}.",
-                                    "Academic Summary": f"You are an academic researcher. Provide a concise, scholarly summary of the key arguments and evidence presented in the YouTube video. Write in {output_language}."
-                                }
-                                content = generate_content(transcript, prompts[content_type], tone, length, model_option)
+                            wordcloud = generate_wordcloud(word_freq)
+                            st.image(wordcloud.to_array(), use_column_width=True)
 
-                                st.subheader(f"Generated {content_type} in {output_language} 📝")
-                                st.write(content)
+                    for output_language in output_languages:
+                        with st.spinner(f"Generating {content_type.lower()} in {output_language}..."):
+                            prompts = {
+                                "News Article": f"You are a news writer. Generate a concise, factual news article in a journalistic style based on the given YouTube video transcript. Write the article in {output_language}.",
+                                "Blog Post": f"You are a blog writer. Create a detailed, engaging blog post covering the key points and insights from the given YouTube video transcript. Write the blog post in {output_language}.",
+                                "Social Media Post": f"You are a social media manager. Create a short, engaging post suitable for platforms like Twitter or LinkedIn, highlighting the main takeaway from the YouTube video. Write the post in {output_language}.",
+                                "Email Newsletter": f"You are a content marketer. Create an informative and engaging email newsletter summarizing the key points from the YouTube video. Write the newsletter in {output_language}.",
+                                "Product Description": f"You are a copywriter. Based on the YouTube video, create a compelling product description that highlights features and benefits. Write in {output_language}.",
+                                "Academic Summary": f"You are an academic researcher. Provide a concise, scholarly summary of the key arguments and evidence presented in the YouTube video. Write in {output_language}."
+                            }
+                            content = generate_content(transcript, prompts[content_type], tone, length, model_option)
 
-                                st.download_button(
-                                    label=f"Download {content_type} 📥",
-                                    data=content,
-                                    file_name=f"{content_type.replace(' ', '_').lower()}_{output_language}.txt",
-                                    mime="text/plain"
-                                )
-                    else:
-                        st.warning(f"Please make sure the video has captions available in {input_language}.")
-            else:
-                st.error("Invalid YouTube URL.")
+                            st.subheader(f"Generated {content_type} in {output_language} 📝")
+                            st.write(content)
+
+                            st.download_button(
+                                label=f"Download {content_type} 📥",
+                                data=content,
+                                file_name=f"{content_type.replace(' ', '_').lower()}_{output_language}.txt",
+                                mime="text/plain"
+                            )
+                else:
+                    st.warning(f"Please make sure the video has captions available in {input_language}.")
         else:
-            st.error("Please enter a YouTube video link.")
+            st.error("Invalid YouTube URL. Please enter a valid video link.")
+
+    st.sidebar.title("About")
+    st.sidebar.info(
+        "This global content studio uses AI to transform YouTube videos into rich, multilingual content with analytics. "
+        "Perfect for international content creators, global marketers, researchers, and anyone looking to deeply understand and reach a diverse audience! 🌐🎓🚀\n\n"
+        "Made with ❤️ by Ragib"
+    )
+
+    st.sidebar.title("New Features")
+    st.sidebar.markdown(
+        "- 🚀 Fast `gemini-1.5-flash-latest` model\n"
+        "- 📊 Transcript analysis with word frequency and word cloud\n"
+        "- 📝 SRT subtitle file download\n"
+        "- 🎓 Academic summary generation\n"
+        "- 🛍️ Product descriptions from videos\n"
+        "- 🌐 Support for Greek, Hebrew, Indonesian & more\n"
+        "- 📈 Longer content up to 5000 characters\n"
+        "- 🎨 'Persuasive' tone for marketing content"
+    )
+
+
 
 if __name__ == "__main__":
     main()
