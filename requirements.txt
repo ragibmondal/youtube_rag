@@ -9,3 +9,4 @@ matplotlib
 pdfkit
 python-docx
 openpyxl
+wordcloud
